@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LIBASS — AI Personal Stylist</title>
+  <meta name="description" content="LIBASS is your AI-powered personal stylist. Upload your wardrobe, discover your body shape, and get intelligent outfit suggestions.">
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+
+  <!-- Auth/Profile Top Left -->
+  <div id="auth-module" class="top-left-profile" onclick="app.toggleAuthModal()">
+    <span id="auth-status">Login / Register</span>
+  </div>
+
+  <!-- Auth Modal -->
+  <div id="auth-modal" style="display:none; flex-direction:column; justify-content:center; align-items:center; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(248,249,250,0.96); z-index:4000; backdrop-filter:blur(12px);">
+    <div style="background:var(--bg-surface); padding:40px 32px; border-radius:var(--radius-xl); box-shadow:var(--shadow-strong); width:360px; text-align:center; border:1px solid var(--border-subtle);">
+      <h1 style="font-size:42px; margin:0 0 4px 0; color:var(--accent-primary);">LIBASS</h1>
+      <p style="color:var(--text-secondary); font-size:14px; margin:0 0 28px 0; font-family:var(--font-body);">Your AI-powered personal stylist</p>
+
+      <input type="email" id="auth-email" class="input-field" placeholder="Email address">
+      <input type="password" id="auth-pass" class="input-field" placeholder="Password">
+      <select id="auth-gender" class="input-field">
+        <option value="unspecified">Select Gender</option>
+        <option value="female">Female</option>
+        <option value="male">Male</option>
+        <option value="other">Other</option>
+      </select>
+
+      <button class="btn-primary" onclick="app.login()" style="width:100%; margin-bottom:12px;">Login</button>
+      <button class="btn-ghost" onclick="app.register()" style="width:100%;">Create Account</button>
+    </div>
+  </div>
+
+  <!-- Profile View Modal -->
+  <div id="profile-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(248,249,250,0.96); z-index:4000; backdrop-filter:blur(12px); flex-direction:column; justify-content:center; align-items:center;">
+    <div style="background:var(--bg-surface); padding:40px 32px; border-radius:var(--radius-xl); box-shadow:var(--shadow-strong); width:360px; text-align:center; position:relative; border:1px solid var(--border-subtle);">
+      <button onclick="document.getElementById('profile-modal').style.display='none'" style="position:absolute; top:16px; right:16px; background:none; border:none; font-size:24px; cursor:pointer; color:var(--text-secondary);">&times;</button>
+
+      <img id="profile-avatar" src="" style="width:96px; height:96px; border-radius:50%; margin-bottom:16px; box-shadow:var(--shadow-card);">
+
+      <h2 style="margin:0 0 16px 0;">Your Profile</h2>
+
+      <div style="background:var(--bg-surface-dim); padding:20px; border-radius:var(--radius-lg); text-align:left; margin-bottom:24px;">
+        <p style="margin:0 0 4px 0; font-size:12px; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.05em;">Email</p>
+        <p id="profile-email-text" style="margin:0 0 16px 0; font-weight:600; font-size:15px;">-</p>
+
+        <p style="margin:0 0 4px 0; font-size:12px; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.05em;">Gender</p>
+        <p id="profile-gender-text" style="margin:0; font-weight:600; font-size:15px; text-transform:capitalize;">-</p>
+      </div>
+
+      <button class="btn-danger" style="width:100%; padding:14px; font-size:15px;" onclick="app.logout()">Logout</button>
+    </div>
+  </div>
+
+  <!-- AI Edit Box Modal -->
+  <div id="ai-edit-modal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:var(--bg-surface); padding:28px; border-radius:var(--radius-xl); box-shadow:var(--shadow-strong); z-index:3000; width:340px; border:1px solid var(--border-subtle);">
+    <h3 style="margin-top:0;">AI Identification</h3>
+    <p style="font-size:12px; color:var(--text-secondary);">Our VisionAgent identified this item. Edit if incorrect!</p>
+    <div style="margin-bottom:16px; text-align:center;">
+      <img id="ai-edit-img" src="" style="width:120px; height:120px; object-fit:contain; background:var(--bg-surface-dim); border-radius:var(--radius-md);">
+    </div>
+    <label style="font-size:12px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.04em;">Name</label>
+    <input type="text" id="ai-edit-name" class="input-field">
+
+    <label style="font-size:12px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.04em;">Category</label>
+    <select id="ai-edit-category" class="input-field" onchange="app.updateSpecificTypeOptions()">
+      <option value="top">Top</option>
+      <option value="bottom">Bottom</option>
+      <option value="dress" id="option-dress">Dress</option>
+      <option value="jewelry">Jewelry</option>
+      <option value="watch">Watch</option>
+      <option value="jacket">Jacket</option>
+      <option value="overpiece">Overpiece</option>
+      <option value="shoes">Shoes</option>
+      <option value="hats">Hats</option>
+    </select>
+
+    <label id="ai-edit-specific-type-label" style="font-size:12px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.04em;">Specific Type</label>
+    <select id="ai-edit-specific-type" class="input-field"></select>
+
+    <label id="ai-edit-fit-label" style="font-size:12px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.04em;">Fit</label>
+    <select id="ai-edit-fit" class="input-field">
+      <option value="regular">Regular</option>
+      <option value="slim">Slim / Tailored</option>
+      <option value="baggy">Baggy / Oversized</option>
+      <option value="flowy">Flowy</option>
+      <option value="crop">Crop</option>
+    </select>
+    <label style="font-size:12px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.04em;">Season</label>
+    <select id="ai-edit-season" class="input-field">
+      <option value="all">All Seasons</option>
+      <option value="summer">☀️ Summer</option>
+      <option value="winter">❄️ Winter</option>
+      <option value="spring">🌸 Spring</option>
+      <option value="rainy">🌧️ Rainy</option>
+    </select>
+    <button class="btn-secondary" id="ai-edit-confirm" style="width:100%;">Confirm & Save</button>
+  </div>
+
+  <!-- Top Right Filters (Outfit Area Only) -->
+  <div id="outfit-filters" style="display:none; position:fixed; top:24px; right:24px; z-index:1000; gap:12px;">
+    <select id="filter-weather" class="input-field" style="margin:0; width:auto; padding:10px 18px; border-radius:var(--radius-pill); font-size:13px;" onchange="app.loadSuggestions()">
+      <option value="summer">☀️ Summer</option>
+      <option value="winter">❄️ Winter</option>
+      <option value="spring">🌸 Spring</option>
+      <option value="rainy">🌧️ Rainy</option>
+    </select>
+
+    <select id="filter-occasion" class="input-field" style="margin:0; width:auto; padding:10px 18px; border-radius:var(--radius-pill); font-size:13px;" onchange="app.loadSuggestions()">
+      <option value="casual">Casual</option>
+      <option value="work">Work</option>
+      <option value="date_night">Date Night</option>
+      <option value="formal">Formal</option>
+    </select>
+  </div>
+
+  <div id="app-container" style="display:none;">
+
+    <!-- ═══ Screen 1: Home ═══ -->
+    <section id="screen-home" class="screen active" style="position:relative; padding-bottom:100px;">
+      <button id="outfit-builder-toggle" class="btn-ghost" style="position:absolute; top:24px; right:24px; padding:10px 18px; border-radius:var(--radius-pill); z-index:1001; font-size:13px;" onclick="app.toggleOutfitBuilder()">Outfit Builder 👗</button>
+
+      <!-- Default Home View -->
+      <div id="home-default-view">
+        <div style="text-align:center; margin-top:8vh;">
+          <h1 style="color:var(--accent-primary); margin-bottom:4px;">LIBASS</h1>
+          <p style="color:var(--text-secondary); font-size:17px; font-family:var(--font-body);">Your AI-powered personal stylist</p>
+        </div>
+
+        <div style="margin-top:32px; padding:0 24px; max-width:520px; margin-left:auto; margin-right:auto;">
+          <!-- Persona Toggle -->
+          <div style="display:flex; justify-content:center; margin-bottom:24px;">
+            <div style="background:var(--bg-surface-dim); border-radius:var(--radius-pill); padding:4px; display:inline-flex; border:1px solid var(--border-subtle);">
+              <button id="btn-persona-casual" class="btn-secondary" style="border-radius:var(--radius-pill); padding:10px 20px; box-shadow:none; font-size:13px;" onclick="app.setPersona('casual')">Quick Pick</button>
+              <button id="btn-persona-fashion" style="background:transparent; color:var(--text-primary); border:none; box-shadow:none; padding:10px 20px; cursor:pointer; font-size:13px; font-weight:600; font-family:var(--font-body); border-radius:var(--radius-pill);" onclick="app.setPersona('fashion_forward')">Lookbook</button>
+            </div>
+          </div>
+
+          <!-- Weather Widget with F/C Toggle -->
+          <div class="card mb-md" style="background:linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-surface-dim) 100%);">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <h3 style="margin:0; font-size:18px;">Daily Suggestion</h3>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <div id="weather-widget" style="font-size:14px; font-weight:600; color:var(--accent-primary);">Loading...</div>
+                <div class="temp-toggle" onclick="app.toggleTempUnit(event)">
+                  <button class="temp-toggle-btn active" data-unit="f">°F</button>
+                  <button class="temp-toggle-btn" data-unit="c">°C</button>
+                </div>
+              </div>
+            </div>
+            <p style="font-size:12px; color:var(--text-secondary); margin-bottom:16px;">Based on your persona and local weather.</p>
+            <div id="home-daily-suggestion" style="min-height:80px; display:flex; align-items:center; justify-content:center; background:var(--bg-surface); border-radius:var(--radius-md); padding:16px;">
+              <span style="color:var(--text-secondary); font-size:14px;">Loading outfit...</span>
+            </div>
+          </div>
+
+          <!-- Style Challenge Card -->
+          <div class="card" style="background:linear-gradient(135deg, var(--accent-secondary) 0%, var(--accent-tertiary) 100%); color:white; border:none;">
+            <h3 style="margin:0; color:white;">🔥 Style Challenge</h3>
+            <p style="font-size:14px; margin-top:8px; opacity:0.9;">Style a look using any bold top you own. Earn Style Points!</p>
+            <button class="btn-ghost" style="background:rgba(255,255,255,0.2); color:white; border-color:rgba(255,255,255,0.4); margin-top:8px;" onclick="app.navigate('screen-wardrobe')">Join Challenge</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Outfit Builder View -->
+      <div id="home-builder-view" style="display:none; padding:80px 24px 24px 24px; max-width:520px; margin:0 auto;">
+        <h2 style="text-align:center;">Outfit Builder</h2>
+        <p style="text-align:center; color:var(--text-secondary); font-size:14px;">Tap a slot to assign an item from your wardrobe.</p>
+
+        <div style="position:relative; width:100%; max-width:280px; margin:40px auto; height:400px;">
+          <div id="builder-mannequin" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:100px; height:280px; background:var(--border-color); border-radius:50px 50px 10px 10px; transition:all 0.4s ease; box-shadow:inset 0 0 20px rgba(0,0,0,0.05);">
+            <div style="position:absolute; top:-50px; left:50%; transform:translateX(-50%); width:45px; height:55px; background:var(--border-color); border-radius:50%; box-shadow:inset 0 0 10px rgba(0,0,0,0.05);"></div>
+            <!-- Mannequin overlay zones for selected items -->
+            <img id="mannequin-hat" class="mannequin-overlay" style="top:-60px; left:50%; transform:translateX(-50%); width:50px; height:50px;" src="" alt="">
+            <img id="mannequin-jewelry" class="mannequin-overlay" style="top:-5px; left:50%; transform:translateX(-50%); width:40px; height:40px;" src="" alt="">
+            <img id="mannequin-top" class="mannequin-overlay" style="top:30px; left:50%; transform:translateX(-50%); width:80px; height:80px;" src="" alt="">
+            <img id="mannequin-jacket" class="mannequin-overlay" style="top:20px; left:50%; transform:translateX(-50%); width:90px; height:90px;" src="" alt="">
+            <img id="mannequin-watch" class="mannequin-overlay" style="top:70px; left:-15px; width:30px; height:30px;" src="" alt="">
+            <img id="mannequin-bottom" class="mannequin-overlay" style="top:120px; left:50%; transform:translateX(-50%); width:75px; height:90px;" src="" alt="">
+            <img id="mannequin-shoes" class="mannequin-overlay" style="top:220px; left:50%; transform:translateX(-50%); width:60px; height:50px;" src="" alt="">
+          </div>
+
+          <div class="builder-slot" style="top:5%; left:-10px;" title="Necklaces & Jewelry" data-category="jewelry" onclick="app.openBuilderSelect('jewelry', this)">📿<span class="slot-label">Jewelry</span></div>
+          <div class="builder-slot" style="top:30%; left:-10px;" title="Shirts & Tops" data-category="top" onclick="app.openBuilderSelect('top', this)">👕<span class="slot-label">Shirt</span></div>
+          <div class="builder-slot" style="top:55%; left:-10px;" title="Watches" data-category="watch" onclick="app.openBuilderSelect('watch', this)">⌚<span class="slot-label">Watch</span></div>
+          <div class="builder-slot" style="top:80%; left:-10px;" title="Pants & Bottoms" data-category="bottom" onclick="app.openBuilderSelect('bottom', this)">👖<span class="slot-label">Pants</span></div>
+
+          <div class="builder-slot" style="top:15%; right:-10px;" title="Hats" data-category="hat" onclick="app.openBuilderSelect('hat', this)">🧢<span class="slot-label">Hat</span></div>
+          <div class="builder-slot" style="top:45%; right:-10px;" title="Jackets" data-category="jacket" onclick="app.openBuilderSelect('jacket', this)">🧥<span class="slot-label">Jacket</span></div>
+          <div class="builder-slot" style="top:75%; right:-10px;" title="Shoes" data-category="shoes" onclick="app.openBuilderSelect('shoes', this)">👟<span class="slot-label">Shoes</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ Screen 2: Outfits ═══ -->
+    <section id="screen-outfit" class="screen">
+      <h2>Your Outfits</h2>
+      <p style="color:var(--text-secondary);">AI-curated suggestions based on your wardrobe and body shape.</p>
+      <div id="suggestions-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:16px; margin-top:24px;"></div>
+
+      <h3 style="margin-top:32px;">Saved Looks</h3>
+      <div id="saved-looks-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:16px; margin-top:16px;"></div>
+    </section>
+
+    <!-- ═══ Screen 3: Wardrobe ═══ -->
+    <section id="screen-wardrobe" class="screen">
+      <h2>Wardrobe</h2>
+      <div id="color-palette-zone" style="margin-bottom:16px; padding:16px; background:var(--bg-surface); border-radius:var(--radius-lg); border:1px solid var(--border-subtle); display:none;">
+        <h4 style="margin:0 0 8px 0; font-size:14px; font-family:var(--font-heading);">Color Palette Analysis</h4>
+        <div id="color-palette-content" style="font-size:13px; color:var(--text-secondary);">Analyzing...</div>
+      </div>
+      <div id="upload-zone" class="card" style="text-align:center; border:2px dashed var(--accent-primary); cursor:pointer; transition:var(--transition);">
+        <p style="font-weight:600; color:var(--accent-primary);">📸 Tap or drag to upload (multiple files supported)</p>
+        <p style="font-size:12px; color:var(--text-secondary);">VisionAgent will auto-crop background and identify items.</p>
+        <input type="file" id="file-upload" style="display:none;" accept="image/*" multiple>
+      </div>
+
+      <div id="wardrobe-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:16px; margin-top:24px;"></div>
+    </section>
+
+    <!-- ═══ Screen 4: Camera / AI Outfit Rater ═══ -->
+    <section id="screen-camera" class="screen">
+      <h2>AI Outfit Rater</h2>
+      <p style="color:var(--text-secondary);">Take a photo of your outfit and get an instant AI rating from 1 to 10.</p>
+
+      <!-- Upload/Camera Area -->
+      <div id="camera-upload-area" style="max-width:400px; margin:24px auto;">
+        <div class="camera-viewfinder" id="camera-preview" style="cursor:pointer;" onclick="document.getElementById('camera-input').click()">
+          <div style="text-align:center; color:rgba(255,255,255,0.6);">
+            <div style="font-size:48px; margin-bottom:12px;">📷</div>
+            <p style="font-size:14px; font-weight:500;">Tap to take or upload a photo</p>
+          </div>
+          <div class="camera-corners" style="display:none;"></div>
+        </div>
+        <input type="file" id="camera-input" accept="image/*" capture="environment" style="display:none;">
+        <button class="btn-primary" id="rate-btn" style="width:100%; margin-top:16px; display:none;" onclick="app.submitOutfitRating()">🔍 Rate My Outfit</button>
+      </div>
+
+      <!-- Rating Results (hidden initially) -->
+      <div id="rating-results" style="display:none; max-width:400px; margin:0 auto;">
+        <div class="card text-center mb-md" style="border-left:4px solid var(--accent-secondary);">
+          <p style="font-size:12px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-secondary); margin:0 0 8px 0;">Your Outfit Score</p>
+          <div class="score-display">
+            <span id="rating-score">7.5</span><span class="out-of"> / 10</span>
+          </div>
+          <p id="rating-feedback" style="font-size:15px; color:var(--text-secondary); margin-top:12px;">Looks great!</p>
+        </div>
+
+        <h3 style="font-size:18px; margin-bottom:16px;">How to make it a 10/10</h3>
+        <div id="rating-improvements"></div>
+
+        <div style="display:flex; gap:12px; margin-top:24px;">
+          <button class="btn-secondary" style="flex:1;" onclick="app.resetCamera()">Rate Another</button>
+          <button class="btn-ghost" style="flex:1;" id="save-rating-btn" onclick="app.saveRating()">💾 Save Look</button>
+        </div>
+      </div>
+
+      <!-- Past Ratings -->
+      <div style="max-width:400px; margin:32px auto 0;">
+        <h3 style="font-size:18px;">Past Ratings</h3>
+        <div id="past-ratings" style="margin-top:12px;"></div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- 4-Tab Bottom Nav -->
+  <nav class="libaas-nav">
+    <a class="nav-tab active" data-target="screen-home">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">Home</span>
+    </a>
+    <a class="nav-tab" data-target="screen-outfit">
+      <span class="nav-icon">👗</span>
+      <span class="nav-label">Outfits</span>
+    </a>
+    <a class="nav-tab" data-target="screen-camera">
+      <span class="nav-icon">📷</span>
+      <span class="nav-label">Camera</span>
+    </a>
+    <a class="nav-tab" data-target="screen-wardrobe">
+      <span class="nav-icon">👔</span>
+      <span class="nav-label">Wardrobe</span>
+    </a>
+  </nav>
+
+  <!-- Outfit Builder Selection Modal -->
+  <div id="builder-select-modal" style="display:none; position:fixed; bottom:0; left:0; right:0; background:var(--bg-surface); border-radius:24px 24px 0 0; padding:28px; box-shadow:0 -10px 40px rgba(0,0,0,0.12); z-index:5000; max-height:60vh; overflow-y:auto; border:1px solid var(--border-subtle);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <h3 id="builder-select-title" style="margin:0; text-transform:capitalize;">Select Item</h3>
+      <button onclick="document.getElementById('builder-select-modal').style.display='none'" style="background:none; border:none; font-size:24px; cursor:pointer; color:var(--text-secondary);">&times;</button>
+    </div>
+    <div id="builder-select-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(100px, 1fr)); gap:12px;"></div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/app.js"></script>
+
+</body>
+</html>

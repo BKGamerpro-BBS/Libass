@@ -1,0 +1,18 @@
+{
+  "test_user_123": {
+    "likes": [
+      {
+        "outfit_id": "outfit_A",
+        "timestamp": 1778879837.879437
+      }
+    ],
+    "dislikes": [
+      {
+        "outfit_id": "outfit_B",
+        "timestamp": 1778879837.8811996
+      }
+    ],
+    "accuracy": 0.72,
+    "feedback_count": 2
+  }
+}
