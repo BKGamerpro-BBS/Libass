@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: libass-backend
+    env: docker
+    plan: free
+    region: ohio
+    rootDir: drape
+    envVars:
+      - key: PORT
+        value: 10000
