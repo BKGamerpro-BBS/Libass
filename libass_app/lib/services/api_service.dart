@@ -13,9 +13,7 @@ class ApiService {
   // - Android emulator: http://10.0.2.2:5000 (maps to host localhost)
   // - Physical device: use your computer's LAN IP, e.g. http://192.168.1.100:5000
   // - iOS simulator: http://localhost:5000
-  static String baseUrl = Platform.isAndroid
-      ? 'http://192.168.1.15:5000'
-      : 'http://localhost:5000';
+  static String baseUrl = 'https://libass-backend.onrender.com';
 
   // Session cookie for auth
   static String? _sessionCookie;

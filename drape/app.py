@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_login import LoginManager
 from models import db, init_db, User
@@ -39,6 +39,11 @@ def create_app():
     app.register_blueprint(suggestions_bp, url_prefix='/api/libaas/suggestions')
     app.register_blueprint(rating_bp, url_prefix='/api/libaas/rating')
     
+    # Health check / root route
+    @app.route('/')
+    def health_check():
+        return jsonify({"status": "ok", "service": "LIBASS Backend API"}), 200
+
     return app
 
 app = create_app()
