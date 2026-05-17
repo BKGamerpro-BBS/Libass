@@ -9,6 +9,7 @@ import 'screens/camera_screen.dart';
 import 'screens/wardrobe_screen.dart';
 import 'screens/profile_screen.dart';
 import 'widgets/nav_bar.dart';
+import 'services/update_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -183,6 +184,15 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // Check for app updates after the main shell loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      UpdateService.checkForUpdate(context);
+    });
+  }
 
   late final List<Widget> _screens = [
     HomeScreen(onNavigate: (i) => setState(() => _currentIndex = i)),

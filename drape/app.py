@@ -44,6 +44,16 @@ def create_app():
     def health_check():
         return jsonify({"status": "ok", "service": "LIBASS Backend API"}), 200
 
+    # App version check endpoint — Flutter app polls this to detect updates
+    @app.route('/api/libaas/version')
+    def app_version():
+        return jsonify({
+            "latest_version": "2.0.0",
+            "min_version": "2.0.0",
+            "download_url": "https://github.com/BKGamerpro-BBS/Libass/releases/latest",
+            "changelog": "Initial production release"
+        }), 200
+
     return app
 
 app = create_app()
