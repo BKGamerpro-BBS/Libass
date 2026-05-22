@@ -382,7 +382,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  _InfoRow(label: 'App Version', value: '2.0.0'),
+                  _InfoRow(label: 'App Version', value: '2.0.1'),
                   const Divider(height: 24),
                   _InfoRow(label: 'Platform', value: 'Flutter'),
                   const Divider(height: 24),
@@ -393,7 +393,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const Divider(height: 24),
                   _InfoRow(
                     label: 'Version',
-                    value: '2.0.0-mobile',
+                    value: '2.0.1-mobile',
                   ),
                 ],
               ),
@@ -432,7 +432,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   SnackBar(
                     content: Text(
                       serverOk
-                          ? '✅ All systems healthy — Server reachable | v2.0.0'
+                          ? '✅ All systems healthy — Server reachable | v2.0.1'
                           : '⚠️ Server unreachable at ${ApiService.baseUrl}',
                     ),
                     backgroundColor: serverOk ? LibassTheme.success : LibassTheme.warning,

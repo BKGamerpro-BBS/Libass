@@ -150,7 +150,7 @@ class _AppShellState extends State<AppShell> {
                 ),
                 const SizedBox(height: 80),
                 const Text(
-                  'v2.0.0',
+                  'v2.0.1',
                   style: TextStyle(
                     color: LibassTheme.borderColor,
                     fontSize: 11,

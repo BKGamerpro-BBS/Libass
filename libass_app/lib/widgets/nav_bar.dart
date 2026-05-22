@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import '../theme.dart';
 
 /// LIBASS animated bottom navigation bar.
@@ -74,8 +73,8 @@ class _NavButton extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 400),
-        curve: Curves.easeOutBack,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOutCubic,
         width: 64,
         transform: Matrix4.translationValues(
           0,
@@ -86,8 +85,8 @@ class _NavButton extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             AnimatedContainer(
-              duration: const Duration(milliseconds: 400),
-              curve: Curves.easeOutBack,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOutCubic,
               width: isActive ? 52 : 40,
               height: isActive ? 52 : 40,
               decoration: BoxDecoration(
@@ -112,8 +111,7 @@ class _NavButton extends StatelessWidget {
                     ? Colors.white
                     : LibassTheme.textSecondary,
               ),
-            ).animate(target: isActive ? 1.0 : 0.0)
-             .scale(begin: const Offset(1, 1), end: const Offset(1.1, 1.1), duration: 200.ms),
+            ),
             const SizedBox(height: 4),
             AnimatedDefaultTextStyle(
               duration: const Duration(milliseconds: 200),

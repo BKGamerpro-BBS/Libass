@@ -8,7 +8,7 @@ import 'api_service.dart';
 /// Checks the backend for the latest app version and shows an update dialog.
 class UpdateService {
   /// The current version of this app — must match pubspec.yaml version.
-  static const String currentVersion = '2.0.0';
+  static const String currentVersion = '2.0.1';
 
   /// Checks the backend for updates and shows a dialog if one is available.
   /// Call this from your main shell after authentication.
