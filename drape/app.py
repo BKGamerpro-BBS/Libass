@@ -36,8 +36,8 @@ def create_app():
     app.register_blueprint(auth_bp, url_prefix='/api/libaas/auth')
     app.register_blueprint(profile_bp, url_prefix='/api/libaas/profile')
     app.register_blueprint(wardrobe_bp, url_prefix='/api/libaas/wardrobe')
-    app.register_blueprint(suggestions_bp, url_prefix='/api/libaas/suggestions')
-    app.register_blueprint(rating_bp, url_prefix='/api/libaas/rating')
+    app.register_blueprint(suggestions_bp, url_prefix='/api/libaas')
+    app.register_blueprint(rating_bp, url_prefix='/api/libaas')
     
     # Health check / root route
     @app.route('/')

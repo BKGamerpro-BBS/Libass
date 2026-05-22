@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../theme.dart';
@@ -49,6 +51,10 @@ class _AuthScreenState extends State<AuthScreen> {
     setState(() => _loading = true);
 
     try {
+      // Wake up the Render server if it's cold-starting
+      _showInfo('Connecting to server...');
+      await ApiService.wakeUpServer();
+
       Map<String, dynamic> result;
       if (_isRegister) {
         result = await ApiService.register(email, pass, _gender);
@@ -59,10 +65,16 @@ class _AuthScreenState extends State<AuthScreen> {
       if (result.containsKey('error')) {
         _showError(result['error']);
       } else {
+        // Clear the "Connecting" snackbar
+        if (mounted) ScaffoldMessenger.of(context).hideCurrentSnackBar();
         widget.onAuthenticated();
       }
+    } on TimeoutException {
+      _showError('Server is taking too long to respond. Please try again.');
+    } on SocketException {
+      _showError('No internet connection. Check your network.');
     } catch (e) {
-      _showError('Connection failed. Is the server running?');
+      _showError('Connection failed. Please try again later.');
     }
 
     if (mounted) setState(() => _loading = false);
@@ -70,11 +82,37 @@ class _AuthScreenState extends State<AuthScreen> {
 
   void _showError(String msg) {
     if (!mounted) return;
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(msg),
         backgroundColor: LibassTheme.danger,
         behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+  }
+
+  void _showInfo(String msg) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const SizedBox(
+              width: 18, height: 18,
+              child: CircularProgressIndicator(
+                strokeWidth: 2, color: Colors.white,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(msg),
+          ],
+        ),
+        backgroundColor: LibassTheme.accentPrimary,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 60),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );

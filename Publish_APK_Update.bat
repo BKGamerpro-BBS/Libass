@@ -47,8 +47,13 @@ if %ERRORLEVEL% neq 0 (
 )
 
 echo.
-echo Step 5: Copying APKs to the Updates folder...
+echo Step 5: Cleaning previous APKs from the Updates folder...
 if not exist "..\Updates" mkdir "..\Updates"
+del /Q "..\Updates\*.apk" 2>nul
+echo    Previous APK files deleted.
+
+echo.
+echo Step 6: Copying new APKs to the Updates folder...
 copy /Y "build\app\outputs\flutter-apk\app-debug.apk" "..\Updates\Libass %APP_VERSION% - Testing.apk"
 copy /Y "build\app\outputs\flutter-apk\app-release.apk" "..\Updates\Libass %APP_VERSION%.apk"
 

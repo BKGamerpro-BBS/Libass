@@ -57,12 +57,14 @@ class _AppShellState extends State<AppShell> {
 
   Future<void> _checkSession() async {
     try {
+      // Proactively wake the Render server during splash screen
+      await ApiService.wakeUpServer();
       final result = await ApiService.checkSession();
       if (result['authenticated'] == true) {
         _authenticated = true;
       }
     } catch (_) {
-      // Server unreachable — stay on auth screen
+      // Server unreachable or no valid session — stay on auth screen
     }
     if (mounted) setState(() => _checkingSession = false);
   }

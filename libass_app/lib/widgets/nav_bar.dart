@@ -112,7 +112,7 @@ class _NavButton extends StatelessWidget {
                     ? Colors.white
                     : LibassTheme.textSecondary,
               ),
-            ).animate(target: isActive ? 1 : 0)
+            ).animate(target: isActive ? 1.0 : 0.0)
              .scale(begin: const Offset(1, 1), end: const Offset(1.1, 1.1), duration: 200.ms),
             const SizedBox(height: 4),
             AnimatedDefaultTextStyle(

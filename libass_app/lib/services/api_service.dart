@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
@@ -18,9 +19,41 @@ class ApiService {
   // Session cookie for auth
   static String? _sessionCookie;
 
+  /// Whether the server has been confirmed awake this session
+  static bool _serverAwake = false;
+
+  /// Production-appropriate timeouts for Render free-tier cold starts
+  static const Duration _authTimeout = Duration(seconds: 60);
+  static const Duration _defaultTimeout = Duration(seconds: 30);
+  static const Duration _longTimeout = Duration(seconds: 45);
+  static const Duration _uploadTimeout = Duration(seconds: 90);
+  static const Duration _pingTimeout = Duration(seconds: 10);
+
   static Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
     _sessionCookie = prefs.getString('session_cookie');
+    // Restore saved base URL (in case user changed it during dev)
+    final savedUrl = prefs.getString('base_url');
+    if (savedUrl != null && savedUrl.isNotEmpty) {
+      baseUrl = savedUrl;
+    }
+  }
+
+  /// Wakes up the Render server if it's cold.
+  /// Returns true if server responded, false if unreachable.
+  static Future<bool> wakeUpServer() async {
+    if (_serverAwake) return true;
+    try {
+      // Use the root health-check endpoint — lightweight, no auth needed
+      final res = await http
+          .get(Uri.parse(baseUrl))
+          .timeout(const Duration(seconds: 60));
+      if (res.statusCode == 200) {
+        _serverAwake = true;
+        return true;
+      }
+    } catch (_) {}
+    return false;
   }
 
   static Map<String, String> get _headers => {
@@ -53,8 +86,10 @@ class ApiService {
     try {
       final res = await http
           .get(Uri.parse('$baseUrl/api/libaas/profile'), headers: _headers)
-          .timeout(const Duration(seconds: 5));
-      return res.statusCode == 200 || res.statusCode == 401; // 401 means auth required, so server is up
+          .timeout(_pingTimeout);
+      final ok = res.statusCode == 200 || res.statusCode == 401;
+      if (ok) _serverAwake = true;
+      return ok;
     } catch (_) {
       return false;
     }
@@ -65,7 +100,7 @@ class ApiService {
     try {
       final res = await http
           .get(Uri.parse('$url/api/libaas/profile'))
-          .timeout(const Duration(seconds: 5));
+          .timeout(_authTimeout);
       // Any response from this endpoint means the server is likely our backend
       return res.statusCode == 200 || res.statusCode == 401;
     } catch (_) {
@@ -81,7 +116,7 @@ class ApiService {
       headers: _headers,
       body: jsonEncode(
           {'email': email, 'password': password, 'gender': gender}),
-    ).timeout(const Duration(seconds: 5));
+    ).timeout(_authTimeout);
     _saveCookie(res);
     return jsonDecode(res.body);
   }
@@ -92,7 +127,7 @@ class ApiService {
       Uri.parse('$baseUrl/api/libaas/auth/login'),
       headers: _headers,
       body: jsonEncode({'email': email, 'password': password}),
-    ).timeout(const Duration(seconds: 5));
+    ).timeout(_authTimeout);
     _saveCookie(res);
     return jsonDecode(res.body);
   }
@@ -101,7 +136,7 @@ class ApiService {
     await http.post(
       Uri.parse('$baseUrl/api/libaas/auth/logout'),
       headers: _headers,
-    ).timeout(const Duration(seconds: 5));
+    ).timeout(_defaultTimeout);
     _sessionCookie = null;
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('session_cookie');
@@ -111,8 +146,9 @@ class ApiService {
     final res = await http.get(
       Uri.parse('$baseUrl/api/libaas/auth/session'),
       headers: _headers,
-    ).timeout(const Duration(seconds: 5));
+    ).timeout(_authTimeout);
     _saveCookie(res);
+    _serverAwake = true;
     return jsonDecode(res.body);
   }
 
@@ -121,7 +157,7 @@ class ApiService {
     final res = await http.get(
       Uri.parse('$baseUrl/api/libaas/profile'),
       headers: _headers,
-    ).timeout(const Duration(seconds: 5));
+    ).timeout(_defaultTimeout);
     return jsonDecode(res.body);
   }
 
@@ -131,7 +167,7 @@ class ApiService {
       Uri.parse('$baseUrl/api/libaas/profile'),
       headers: _headers,
       body: jsonEncode(data),
-    ).timeout(const Duration(seconds: 5));
+    ).timeout(_defaultTimeout);
     return jsonDecode(res.body);
   }
 
@@ -140,7 +176,7 @@ class ApiService {
     final res = await http.get(
       Uri.parse('$baseUrl/api/libaas/wardrobe'),
       headers: _headers,
-    ).timeout(const Duration(seconds: 5));
+    ).timeout(_defaultTimeout);
     final list = jsonDecode(res.body) as List;
     return list.map((i) => WardrobeItem.fromJson(i)).toList();
   }
@@ -154,7 +190,7 @@ class ApiService {
       req.headers['Cookie'] = _sessionCookie!;
     }
     req.files.add(await http.MultipartFile.fromPath('images', imageFile.path));
-    final streamedRes = await req.send().timeout(const Duration(seconds: 30));
+    final streamedRes = await req.send().timeout(_uploadTimeout);
     final res = await http.Response.fromStream(streamedRes);
     _saveCookie(res);
     if (res.statusCode >= 400) {
@@ -171,7 +207,7 @@ class ApiService {
       Uri.parse('$baseUrl/api/libaas/wardrobe/$id'),
       headers: _headers,
       body: jsonEncode(data),
-    ).timeout(const Duration(seconds: 5));
+    ).timeout(_defaultTimeout);
     return WardrobeItem.fromJson(jsonDecode(res.body));
   }
 
@@ -179,7 +215,7 @@ class ApiService {
     await http.delete(
       Uri.parse('$baseUrl/api/libaas/wardrobe/$id'),
       headers: _headers,
-    ).timeout(const Duration(seconds: 5));
+    ).timeout(_defaultTimeout);
   }
 
   // ─── SUGGESTIONS ──────────────────────────────────
@@ -192,7 +228,7 @@ class ApiService {
       Uri.parse(
           '$baseUrl/api/libaas/suggestions?weather=$weather&occasion=$occasion&persona=$persona'),
       headers: _headers,
-    ).timeout(const Duration(seconds: 15));
+    ).timeout(_longTimeout);
     final list = jsonDecode(res.body) as List;
     return list.map((i) => OutfitSuggestion.fromJson(i)).toList();
   }
@@ -202,7 +238,7 @@ class ApiService {
     final res = await http.get(
       Uri.parse('$baseUrl/api/libaas/weather?lat=$lat&lon=$lon'),
       headers: _headers,
-    ).timeout(const Duration(seconds: 10));
+    ).timeout(_defaultTimeout);
     return WeatherData.fromJson(jsonDecode(res.body));
   }
 
@@ -216,7 +252,7 @@ class ApiService {
       req.headers['Cookie'] = _sessionCookie!;
     }
     req.files.add(await http.MultipartFile.fromPath('image', imageFile.path));
-    final streamedRes = await req.send().timeout(const Duration(seconds: 30));
+    final streamedRes = await req.send().timeout(_uploadTimeout);
     final res = await http.Response.fromStream(streamedRes);
     _saveCookie(res);
     return OutfitRating.fromJson(jsonDecode(res.body));
@@ -228,7 +264,7 @@ class ApiService {
       Uri.parse('$baseUrl/api/libaas/feedback'),
       headers: _headers,
       body: jsonEncode({'item_ids': itemIds, 'is_liked': isLiked}),
-    ).timeout(const Duration(seconds: 5));
+    ).timeout(_defaultTimeout);
   }
 
   /// Full image URL from relative server path

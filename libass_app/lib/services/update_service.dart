@@ -16,7 +16,7 @@ class UpdateService {
     try {
       final res = await http
           .get(Uri.parse('${ApiService.baseUrl}/api/libaas/version'))
-          .timeout(const Duration(seconds: 5));
+          .timeout(const Duration(seconds: 30));
 
       if (res.statusCode != 200) return;
 

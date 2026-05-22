@@ -4,7 +4,24 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="aa49f47c-37f3-406a-b7d2-2ff72620dbb3" name="Changes" comment="" />
+    <list default="true" id="aa49f47c-37f3-406a-b7d2-2ff72620dbb3" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/deviceManager.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Publish_APK_Update.bat" beforeDir="false" afterPath="$PROJECT_DIR$/Publish_APK_Update.bat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Updates/libass test.apk" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/drape/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/drape/app.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/drape/drape.db" beforeDir="false" afterPath="$PROJECT_DIR$/drape/drape.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/drape/drape.db-shm" beforeDir="false" afterPath="$PROJECT_DIR$/drape/drape.db-shm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/drape/drape.db-wal" beforeDir="false" afterPath="$PROJECT_DIR$/drape/drape.db-wal" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/drape/e2e_app_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/drape/e2e_app_test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libass_app/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/libass_app/lib/main.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libass_app/lib/screens/auth_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/libass_app/lib/screens/auth_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libass_app/lib/services/api_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/libass_app/lib/services/api_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libass_app/lib/services/update_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/libass_app/lib/services/update_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libass_app/lib/widgets/nav_bar.dart" beforeDir="false" afterPath="$PROJECT_DIR$/libass_app/lib/widgets/nav_bar.dart" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -13,10 +30,25 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 1,
-  "fromUser": false
-}]]></component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;BKGamerpro-BBS&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/BKGamerpro-BBS/Libass.git&quot;,
+    &quot;accountId&quot;: &quot;4f07b9d4-1d04-4fa7-ac8b-7be5b51f7441&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 1,
+  &quot;fromUser&quot;: false
+}</component>
   <component name="ProjectId" id="3DltmxNcdBtb9zMIv3fLqdGHise" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -27,9 +59,12 @@
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.readMode.enableVisualFormatting": "true",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
+    "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/Acer/Desktop/PROJECTS/Libass 2.0"
   }

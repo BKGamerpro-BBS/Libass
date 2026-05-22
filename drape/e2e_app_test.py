@@ -82,7 +82,7 @@ def run_tests():
         "body_shape": "rectangle"
     }
     status, data = make_request("POST", f"{BASE_URL}/profile", profile_data)
-    if status == 200 and data.get('status') == 'success':
+    if status == 200 and 'body_shape' in data:
         print("[OK] Profile updated successfully")
     else:
         print(f"[FAIL] Profile update failed. Status: {status}, Response: {data}")
