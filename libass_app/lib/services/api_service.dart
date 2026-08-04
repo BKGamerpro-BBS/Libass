@@ -5,16 +5,13 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/models.dart';
 
-/// LIBASS API Client — talks to the Flask backend.
-///
-/// For development, set [baseUrl] to your computer's local network IP
-/// (e.g. http://192.168.1.100:5000). For production, point to your server.
+/// LIBASS API Client — talks to the Flask backend API server.
 class ApiService {
-  // Change this to your Flask backend URL.
-  // - Android emulator: http://10.0.2.2:5000 (maps to host localhost)
-  // - Physical device: use your computer's LAN IP, e.g. http://192.168.1.100:5000
-  // - iOS simulator: http://localhost:5000
-  static String baseUrl = 'https://libass-backend.onrender.com';
+  /// Default production API endpoint (HTTPS encrypted)
+  static const String defaultUrl = 'https://libass-backend.onrender.com';
+
+  /// Active base URL (defaults to production)
+  static String baseUrl = defaultUrl;
 
   // Session cookie for auth
   static String? _sessionCookie;
@@ -35,16 +32,14 @@ class ApiService {
   static Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
     _sessionCookie = prefs.getString('session_cookie');
-    // Restore saved base URL (in case user changed it during dev)
+    // Restore saved base URL if set
     final savedUrl = prefs.getString('base_url');
     if (savedUrl != null && savedUrl.isNotEmpty) {
       baseUrl = savedUrl;
     }
   }
 
-  static const String defaultUrl = 'https://libass-backend.onrender.com';
-
-  /// Helper to check if a URL points to a local IP / localhost
+  /// Helper to check if a URL points to an internal testing host / localhost
   static bool isLocalUrl(String url) {
     return url.contains('localhost') ||
         url.contains('127.0.0.1') ||
@@ -126,7 +121,7 @@ class ApiService {
   static Future<void> updateBaseUrl(String url) async {
     url = url.trim();
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
-      url = 'http://$url';
+      url = 'https://$url';
     }
     if (url.endsWith('/')) {
       url = url.substring(0, url.length - 1);
@@ -144,7 +139,7 @@ class ApiService {
     url = url.trim();
     if (url.isEmpty) return false;
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
-      url = 'http://$url';
+      url = 'https://$url';
     }
     if (url.endsWith('/')) {
       url = url.substring(0, url.length - 1);
