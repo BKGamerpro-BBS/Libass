@@ -42,10 +42,42 @@ class ApiService {
     }
   }
 
-  /// Wakes up the Render server if it's cold.
-  /// Returns true if server responded, false if unreachable.
+  static const String defaultUrl = 'https://libass-backend.onrender.com';
+
+  /// Helper to check if a URL points to a local IP / localhost
+  static bool isLocalUrl(String url) {
+    return url.contains('localhost') ||
+        url.contains('127.0.0.1') ||
+        url.contains('10.0.2.2') ||
+        url.contains('192.168.') ||
+        url.contains('172.');
+  }
+
+  /// Wakes up the Render server or checks server connectivity.
+  /// If configured to a local IP that is unreachable (e.g. on Mobile Data),
+  /// automatically falls back to the production Render URL.
   static Future<bool> wakeUpServer() async {
     if (_serverAwake) return true;
+
+    // If configured to a local IP, attempt a quick 3-second ping
+    if (isLocalUrl(baseUrl)) {
+      try {
+        final res = await http
+            .get(Uri.parse(baseUrl))
+            .timeout(const Duration(seconds: 3));
+        if (res.statusCode == 200) {
+          _serverAwake = true;
+          return true;
+        }
+      } catch (_) {
+        // Local IP unreachable (e.g. user switched to Mobile Data or left home Wi-Fi)
+        // Auto-fallback to production Render backend
+        baseUrl = defaultUrl;
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('base_url', defaultUrl);
+      }
+    }
+
     try {
       // Use the root health-check endpoint — lightweight, no auth needed
       final res = await http
@@ -65,10 +97,7 @@ class ApiService {
     _keepAliveTimer?.cancel();
 
     // Check if the current URL is local. If it is, skip pinging.
-    final isLocal = baseUrl.contains('localhost') || 
-                    baseUrl.contains('127.0.0.1') || 
-                    baseUrl.contains('10.0.2.2');
-    if (isLocal) return;
+    if (isLocalUrl(baseUrl)) return;
 
     // Ping every 5 minutes (Render's timeout is 15 minutes)
     _keepAliveTimer = Timer.periodic(const Duration(minutes: 5), (timer) async {

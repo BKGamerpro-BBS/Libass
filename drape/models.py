@@ -47,12 +47,14 @@ class User(db.Model):
 class Profile(db.Model):
     __tablename__ = 'profile'
     user_id = db.Column(db.String(36), db.ForeignKey('user.id'), primary_key=True)
+    name = db.Column(db.String(120))
     height_cm = db.Column(db.Float)
     chest_cm = db.Column(db.Float)
     high_waist_cm = db.Column(db.Float)
     waist_cm = db.Column(db.Float)
     hip_cm = db.Column(db.Float)
     body_shape = db.Column(db.String(30))
+
 
 
 class WardrobeItem(db.Model):
@@ -126,3 +128,11 @@ def init_db(app):
             cursor.close()
 
         db.create_all()
+        
+        # Migration check: ensure 'name' column exists in 'profile' table
+        try:
+            db.session.execute(text("ALTER TABLE profile ADD COLUMN name VARCHAR(120)"))
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+

@@ -2,7 +2,8 @@ import uuid
 from flask import Blueprint, request, jsonify
 from werkzeug.security import generate_password_hash
 from flask_login import login_user, logout_user, login_required, current_user
-from models import db, User
+from models import db, User, Profile
+
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -25,6 +26,11 @@ def register():
         gender=gender
     )
     db.session.add(user)
+    
+    # Initialize profile record for user
+    profile = Profile(user_id=user.id)
+    db.session.add(profile)
+    
     db.session.commit()
 
     login_user(user)
