@@ -8,6 +8,7 @@ from flask import Blueprint, request, jsonify, current_app
 from flask_login import login_required, current_user
 from models import db, OutfitRating
 from ai_engine import OrchestratorAgent
+from upload_security import validate_and_save_upload
 
 rating_bp = Blueprint('rating', __name__)
 
@@ -20,18 +21,19 @@ def rate_outfit():
         return jsonify({"error": "No image uploaded"}), 400
 
     file = request.files['image']
-    if file.filename == '':
-        return jsonify({"error": "No file selected"}), 400
+    upload_folder = current_app.config['UPLOAD_FOLDER']
 
-    ext = file.filename.rsplit('.', 1)[-1].lower()
-    if ext not in ['jpg', 'jpeg', 'png', 'webp']:
-        return jsonify({"error": "Invalid file type"}), 400
+    ok, filepath_or_err, web_path = validate_and_save_upload(
+        file, 
+        upload_folder, 
+        filename_prefix="rating"
+    )
+    if not ok:
+        return jsonify({"error": filepath_or_err}), 400
 
-    # Save the uploaded photo
-    photo_id = str(uuid.uuid4())
-    filename = f"rating_{photo_id}.{ext}"
-    filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-    file.save(filepath)
+    filepath = filepath_or_err
+    filename = os.path.basename(filepath)
+    photo_id = filename.replace("rating_", "").split(".")[0]
 
     # Run through the OrchestratorAgent pipeline
     score, feedback, improvements = OrchestratorAgent.rate_outfit_photo(filepath)

@@ -1,8 +1,21 @@
 import os
-from flask import Flask, jsonify, send_from_directory
+import logging
+from flask import Flask, jsonify, send_from_directory, request
 from flask_cors import CORS
 from flask_login import LoginManager
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from dotenv import load_dotenv
 from models import db, init_db, User
+
+from extensions import limiter
+
+# Load environment variables from .env
+load_dotenv()
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
+
 
 # Import Blueprints
 from routes.auth import auth_bp
@@ -14,8 +27,12 @@ from routes.wardrobe import wardrobe_bp
 def create_app():
     app = Flask(__name__)
     
-    # Basic Config
-    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default-dev-secret-key-change-in-production')
+    # Security Config
+    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-fallback-secret-key-change-in-production')
+    app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024  # Enforce 10MB maximum payload/upload limit
+    
+    # Initialize Rate Limiter
+    limiter.init_app(app)
     
     # Upload folder — used by wardrobe and rating routes to save images
     upload_dir = os.path.join(app.root_path, 'uploads')
@@ -36,15 +53,44 @@ def create_app():
     def load_user(user_id):
         return User.query.get(user_id)
 
+    # Security Headers Middleware
+    @app.after_request
+    def add_security_headers(response):
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+        response.headers['X-Frame-Options'] = 'DENY'
+        response.headers['X-XSS-Protection'] = '1; mode=block'
+        return response
+
+    # Global Error Handlers — Prevents stack traces, raw SQL, or path leakage
+    @app.errorhandler(429)
+    def ratelimit_handler(e):
+        return jsonify({
+            "error": "Too many requests. Please slow down and try again later.",
+            "retry_after": getattr(e, 'description', 60)
+        }), 429
+
+    @app.errorhandler(400)
+    def bad_request_handler(e):
+        desc = getattr(e, 'description', 'Bad request.')
+        return jsonify({"error": str(desc)}), 400
+
+    @app.errorhandler(413)
+    def request_entity_too_large(e):
+        return jsonify({"error": "File size exceeds maximum allowed limit (10MB)."}), 413
+
+    @app.errorhandler(Exception)
+    def handle_unexpected_error(e):
+        logging.exception(f"Unhandled server exception: {e}")
+        return jsonify({"error": "An internal server error occurred."}), 500
+
     # Register Blueprints
-    # Base URL from e2e_app_test.py is /api/libaas
     app.register_blueprint(auth_bp, url_prefix='/api/libaas/auth')
     app.register_blueprint(profile_bp, url_prefix='/api/libaas/profile')
     app.register_blueprint(wardrobe_bp, url_prefix='/api/libaas/wardrobe')
     app.register_blueprint(suggestions_bp, url_prefix='/api/libaas')
     app.register_blueprint(rating_bp, url_prefix='/api/libaas')
     
-    # Serve uploaded images (wardrobe photos, rating photos)
+    # Serve uploaded images securely
     @app.route('/uploads/<path:filename>')
     def serve_upload(filename):
         return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
@@ -61,7 +107,7 @@ def create_app():
             "latest_version": "2.0.1",
             "min_version": "2.0.0",
             "download_url": "https://github.com/BKGamerpro-BBS/Libass/releases/latest",
-            "changelog": "Bug fixes: upload/rating crashes, nav bar animation glitch, image serving"
+            "changelog": "Security hardening: Rate limiting, input validation, file upload magic-byte verification"
         }), 200
 
     return app
