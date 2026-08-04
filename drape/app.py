@@ -69,5 +69,6 @@ def create_app():
 app = create_app()
 
 if __name__ == '__main__':
-    # Start the server locally
-    app.run(debug=True, port=5000)
+    # Start the server listening on all network interfaces (accessible via LAN/Wi-Fi IP)
+    app.run(host='0.0.0.0', debug=True, port=5000)
+
