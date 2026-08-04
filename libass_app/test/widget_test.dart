@@ -11,5 +11,12 @@ void main() {
     await tester.pumpWidget(const LibassApp());
     // The splash screen should show the LIBASS branding
     expect(find.text('AI Personal Stylist'), findsOneWidget);
+    
+    // Wait for the async session check to finish (network will fail or timeout in test, falling back to AuthScreen)
+    await tester.pump(const Duration(seconds: 1)); // allow future to complete
+    await tester.pumpAndSettle(); // settle animations
+    
+    // Let's check if the AuthScreen is now shown
+    expect(find.text('Sign In'), findsOneWidget);
   });
 }

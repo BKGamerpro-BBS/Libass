@@ -378,7 +378,9 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
                   return DropdownMenuItem(
                     value: o,
                     child: Text(
-                      prefix + o[0].toUpperCase() + o.substring(1),
+                      o.isNotEmpty
+                          ? prefix + o[0].toUpperCase() + o.substring(1)
+                          : prefix,
                       style: const TextStyle(fontSize: 14),
                     ),
                   );
@@ -747,7 +749,9 @@ class _WardrobeCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
-                      '$seasonEmoji ${item.season[0].toUpperCase()}${item.season.substring(1)}',
+                      item.season.isNotEmpty
+                          ? '$seasonEmoji ${item.season[0].toUpperCase()}${item.season.substring(1)}'
+                          : '$seasonEmoji All',
                       style: const TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w600,

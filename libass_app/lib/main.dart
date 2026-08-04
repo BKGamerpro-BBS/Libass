@@ -14,6 +14,7 @@ import 'services/update_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await ApiService.init();
+  ApiService.startKeepAliveLoop(); // Start production server keep-alive ping loop
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -45,14 +46,33 @@ class AppShell extends StatefulWidget {
   State<AppShell> createState() => _AppShellState();
 }
 
-class _AppShellState extends State<AppShell> {
+class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   bool _authenticated = false;
   bool _checkingSession = true;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _checkSession();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // Proactively wake/ping server when app returns to foreground
+      ApiService.wakeUpServer();
+      ApiService.startKeepAliveLoop();
+    } else if (state == AppLifecycleState.paused) {
+      // Pause keep-alive loop when app goes to background
+      ApiService.stopKeepAliveLoop();
+    }
   }
 
   Future<void> _checkSession() async {

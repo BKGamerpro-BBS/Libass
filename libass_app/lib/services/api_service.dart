@@ -22,6 +22,9 @@ class ApiService {
   /// Whether the server has been confirmed awake this session
   static bool _serverAwake = false;
 
+  /// Timer for keeping production server awake
+  static Timer? _keepAliveTimer;
+
   /// Production-appropriate timeouts for Render free-tier cold starts
   static const Duration _authTimeout = Duration(seconds: 60);
   static const Duration _defaultTimeout = Duration(seconds: 30);
@@ -56,12 +59,43 @@ class ApiService {
     return false;
   }
 
+  /// Starts a periodic keep-alive ping loop that runs every 5 minutes.
+  /// This prevents the remote Render server from sleeping while the app is active.
+  static void startKeepAliveLoop() {
+    _keepAliveTimer?.cancel();
+
+    // Check if the current URL is local. If it is, skip pinging.
+    final isLocal = baseUrl.contains('localhost') || 
+                    baseUrl.contains('127.0.0.1') || 
+                    baseUrl.contains('10.0.2.2');
+    if (isLocal) return;
+
+    // Ping every 5 minutes (Render's timeout is 15 minutes)
+    _keepAliveTimer = Timer.periodic(const Duration(minutes: 5), (timer) async {
+      try {
+        final res = await http.get(Uri.parse(baseUrl)).timeout(_pingTimeout);
+        if (res.statusCode == 200) {
+          _serverAwake = true;
+        }
+      } catch (_) {
+        // Fail silently during keep-alive pings
+      }
+    });
+  }
+
+  /// Cancels the keep-alive ping loop.
+  static void stopKeepAliveLoop() {
+    _keepAliveTimer?.cancel();
+    _keepAliveTimer = null;
+  }
+
   static Map<String, String> get _headers => {
         'Content-Type': 'application/json',
         if (_sessionCookie != null) 'Cookie': _sessionCookie!,
       };
 
   static Future<void> updateBaseUrl(String url) async {
+    url = url.trim();
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
       url = 'http://$url';
     }
@@ -71,6 +105,30 @@ class ApiService {
     baseUrl = url;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('base_url', url);
+    
+    // Restart keep-alive loop with the new URL configuration
+    startKeepAliveLoop();
+  }
+
+  /// Check if a given URL is a valid Libass server
+  static Future<bool> testConnection(String url) async {
+    url = url.trim();
+    if (url.isEmpty) return false;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'http://$url';
+    }
+    if (url.endsWith('/')) {
+      url = url.substring(0, url.length - 1);
+    }
+    try {
+      final res = await http
+          .get(Uri.parse('$url/api/libaas/profile'))
+          .timeout(_authTimeout);
+      // Any response from this endpoint means the server is likely our backend
+      return res.statusCode == 200 || res.statusCode == 401;
+    } catch (_) {
+      return false;
+    }
   }
 
   static void _saveCookie(http.Response res) async {
@@ -90,19 +148,6 @@ class ApiService {
       final ok = res.statusCode == 200 || res.statusCode == 401;
       if (ok) _serverAwake = true;
       return ok;
-    } catch (_) {
-      return false;
-    }
-  }
-
-  /// Check if a given URL is a valid Libass server
-  static Future<bool> testConnection(String url) async {
-    try {
-      final res = await http
-          .get(Uri.parse('$url/api/libaas/profile'))
-          .timeout(_authTimeout);
-      // Any response from this endpoint means the server is likely our backend
-      return res.statusCode == 200 || res.statusCode == 401;
     } catch (_) {
       return false;
     }

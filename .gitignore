@@ -9,3 +9,6 @@ venv/
 .venv/
 drape.db-shm
 drape.db-wal
+graphify-out/
+.graphify/
+

@@ -188,6 +188,106 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  void _showServerDialog() {
+    bool testing = false;
+    String? testResult;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Server Connection'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Configure the backend API URL. Useful for connecting to a local dev server.',
+                style: TextStyle(fontSize: 12, color: LibassTheme.textSecondary),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _serverCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Server URL',
+                  hintText: 'https://...',
+                ),
+              ),
+              const SizedBox(height: 12),
+              if (testResult != null)
+                Text(
+                  testResult!,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: testResult!.startsWith('✅')
+                        ? LibassTheme.success
+                        : LibassTheme.danger,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      _serverCtrl.text = 'https://libass-backend.onrender.com';
+                    },
+                    child: const Text('Reset to Default'),
+                  ),
+                  ElevatedButton(
+                    onPressed: testing
+                        ? null
+                        : () async {
+                            setState(() {
+                              testing = true;
+                              testResult = null;
+                            });
+                            final url = _serverCtrl.text.trim();
+                            final ok = await ApiService.testConnection(url);
+                            setState(() {
+                              testing = false;
+                              testResult = ok
+                                  ? '✅ Server is reachable!'
+                                  : '❌ Server unreachable. Check URL or network.';
+                            });
+                          },
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    ),
+                    child: testing
+                        ? const SizedBox(
+                            width: 14,
+                            height: 14,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text('Test Connection', style: TextStyle(fontSize: 12)),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                await _updateServer();
+                if (context.mounted) Navigator.pop(ctx);
+              },
+              child: const Text('Save', style: TextStyle(color: LibassTheme.accentPrimary, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _serverCtrl.dispose();
@@ -230,7 +330,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           child: Center(
                             child: Text(
-                              (_profile?['email'] ?? 'U')[0].toUpperCase(),
+                              _profile?['email']?.toString().isNotEmpty == true
+                                  ? _profile!['email'].toString()[0].toUpperCase()
+                                  : 'U',
                               style: const TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.w700,
@@ -326,6 +428,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   title: const Text('Language', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
                   trailing: const Text('English', style: TextStyle(color: LibassTheme.textSecondary, fontSize: 13)),
                   onTap: () {},
+                ),
+                const Divider(height: 1, indent: 56),
+                ListTile(
+                  leading: const Icon(Icons.dns_rounded, color: LibassTheme.accentPrimary),
+                  title: const Text('Server Connection', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+                  trailing: Text(
+                    ApiService.baseUrl.replaceFirst('https://', '').replaceFirst('http://', ''),
+                    style: const TextStyle(color: LibassTheme.textSecondary, fontSize: 11),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  onTap: _showServerDialog,
                 ),
               ],
             ),

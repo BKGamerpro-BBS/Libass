@@ -215,14 +215,9 @@ class _CameraScreenState extends State<CameraScreen> {
                               ],
                             ),
                           ),
-                        ).animate(onPlay: (controller) => controller.repeat()).moveY(
+                        ).animate(onPlay: (controller) => controller.repeat(reverse: true)).moveY(
                               begin: 0,
                               end: 350,
-                              duration: 2.seconds,
-                              curve: Curves.easeInOut,
-                            ).then().moveY(
-                              begin: 350,
-                              end: 0,
                               duration: 2.seconds,
                               curve: Curves.easeInOut,
                             ),

@@ -5,22 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="aa49f47c-37f3-406a-b7d2-2ff72620dbb3" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/deviceManager.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Publish_APK_Update.bat" beforeDir="false" afterPath="$PROJECT_DIR$/Publish_APK_Update.bat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Updates/libass test.apk" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/drape/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/drape/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/drape/drape.db" beforeDir="false" afterPath="$PROJECT_DIR$/drape/drape.db" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/drape/drape.db-shm" beforeDir="false" afterPath="$PROJECT_DIR$/drape/drape.db-shm" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/drape/drape.db-wal" beforeDir="false" afterPath="$PROJECT_DIR$/drape/drape.db-wal" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/drape/e2e_app_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/drape/e2e_app_test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libass_app/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/libass_app/lib/main.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libass_app/lib/screens/auth_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/libass_app/lib/screens/auth_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libass_app/lib/services/api_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/libass_app/lib/services/api_service.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libass_app/lib/services/update_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/libass_app/lib/services/update_service.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libass_app/lib/widgets/nav_bar.dart" beforeDir="false" afterPath="$PROJECT_DIR$/libass_app/lib/widgets/nav_bar.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Updates/Libass 2.0.0 - Testing.apk" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Updates/libass 2.0.0.apk" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -54,21 +41,21 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.cidr.known.project.marker": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.readMode.enableVisualFormatting": "true",
-    "cf.first.check.clang-format": "false",
-    "cidr.known.project.marker": "true",
-    "git-widget-placeholder": "main",
-    "ignore.virus.scanning.warn.message": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/Acer/Desktop/PROJECTS/Libass 2.0"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Acer/Desktop/PROJECTS/Libass 2.0&quot;
   }
-}]]></component>
+}</component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="aa49f47c-37f3-406a-b7d2-2ff72620dbb3" name="Changes" comment="" />
